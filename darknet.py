@@ -147,7 +147,7 @@ class Darknet(nn.Module):
                 kernel_size = int(block['size'])
                 stride = int(block['stride'])
                 is_pad = int(block['pad'])
-                pad = (kernel_size-1)/2 if is_pad else 0
+                pad = (kernel_size-1)//2 if is_pad else 0
                 activation = block['activation']
                 model = nn.Sequential()
                 if batch_normalize:
@@ -235,7 +235,7 @@ class Darknet(nn.Module):
         return models
 
     def load_weights(self, weightfile):
-        if self.blocks[0].has_key('mean_file'):
+        if 'mean_file' in self.blocks[0]:
             import caffe_pb2
             mean_file = self.blocks[0]['mean_file']
             mean_file = mean_file.strip('"')
