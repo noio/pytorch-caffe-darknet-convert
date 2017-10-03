@@ -5,13 +5,13 @@ except:
     try:
         import caffe_pb2
     except:
-        print 'caffe_pb2.py not found. Try:'
-        print '  protoc caffe.proto --python_out=.'
+        print('caffe_pb2.py not found. Try:')
+        print('  protoc caffe.proto --python_out=.')
         exit()
 
 def parse_caffemodel(caffemodel):
     model = caffe_pb2.NetParameter()
-    print 'Loading caffemodel: ', caffemodel
+    print('Loading caffemodel: ', caffemodel)
     with open(caffemodel, 'rb') as fp:
         model.ParseFromString(fp.read())
 
@@ -162,13 +162,13 @@ def save_prototxt(net_info, protofile, region=True):
         
     props = net_info['props']
     layers = net_info['layers']
-    print >> fp, 'name: \"%s\"' % props['name']
-    print >> fp, 'input: \"%s\"' % props['input']
-    print >> fp, 'input_dim: %s' % props['input_dim'][0]
-    print >> fp, 'input_dim: %s' % props['input_dim'][1]
-    print >> fp, 'input_dim: %s' % props['input_dim'][2]
-    print >> fp, 'input_dim: %s' % props['input_dim'][3]
-    print >> fp, ''
+    fp.write('name: \"%s\"\n' % props['name'])
+    fp.write('input: \"%s\"\n' % props['input'])
+    fp.write('input_dim: %s\n' % props['input_dim'][0])
+    fp.write('input_dim: %s\n' % props['input_dim'][1])
+    fp.write('input_dim: %s\n' % props['input_dim'][2])
+    fp.write('input_dim: %s\n' % props['input_dim'][3])
+    fp.write('\n')
     for layer in layers:
         if layer['type'] != 'Region' or region == True:
             print_block(layer, 'layer', 0)
