@@ -79,7 +79,7 @@ def pytorch2caffe(input_var, output_var, protofile, caffemodel):
     net.save(caffemodel)
 
 def save_conv2caffe(weights, biases, conv_param):
-    if biases:
+    if biases is not None:
         conv_param[1].data[...] = biases.numpy() 
     conv_param[0].data[...] = weights.numpy() 
 
@@ -171,6 +171,9 @@ def pytorch2prototxt(input_var, output_var):
             scale_layer['scale_param'] = scale_param
         elif parent_type == 'ThresholdBackward':
             parent_top = parent_bottoms[0]
+        elif parent_type == 'LeakyReLUBackward':
+            parent_top = parent_bottoms[0]
+            layer['relu_param'] = OrderedDict(negative_slope=0.1)
         elif parent_type == 'MaxPool2dBackward':
             pooling_param = OrderedDict()
             pooling_param['pool'] = 'MAX'

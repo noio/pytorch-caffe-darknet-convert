@@ -149,16 +149,16 @@ def save_prototxt(net_info, protofile, region=True):
 
     def print_block(block_info, prefix, indent):
         blanks = ''.join([' ']*indent)
-        print >>fp, '%s%s {' % (blanks, prefix)
+        fp.write('%s%s {' % (blanks, prefix))
         for key,value in block_info.items():
             if type(value) == OrderedDict:
                 print_block(value, key, indent+4)
             elif type(value) == list:
                 for v in value:
-                    print >> fp, '%s    %s: %s' % (blanks, key, format_value(v))
+                    fp.write('%s    %s: %s' % (blanks, key, format_value(v)))
             else:
-                print >> fp, '%s    %s: %s' % (blanks, key, format_value(value))
-        print >> fp, '%s}' % blanks
+                fp.write('%s    %s: %s' % (blanks, key, format_value(value)))
+        fp.write('%s}' % blanks)
         
     props = net_info['props']
     layers = net_info['layers']
