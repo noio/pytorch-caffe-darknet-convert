@@ -11,6 +11,7 @@ from prototxt import *
 
 layer_dict = {'ConvNdBackward'    : 'Convolution',
               'ThresholdBackward' : 'ReLU',
+              'LeakyReLUBackward' : 'ReLU',
               'MaxPool2dBackward' : 'Pooling',
               'AvgPool2dBackward' : 'Pooling',
               'DropoutBackward'   : 'Dropout',
