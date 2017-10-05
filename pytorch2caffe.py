@@ -67,8 +67,9 @@ def pytorch2caffe(input_var, output_var, protofile, caffemodel):
                 scale_biases = func.next_functions[2][0].variable.data
                 bn_name = parent_name + "_bn"
                 scale_name = parent_name + "_scale"
-                save_bn2caffe(running_mean, running_var, params[bn_name])
-                save_scale2caffe(scale_weights, scale_biases, params[scale_name])
+                
+                save_bn2caffe_merged(running_mean, running_var, scale_weights, scale_biases, params[bn_name])
+                # save_scale2caffe(scale_weights, scale_biases, params[scale_name])
             elif parent_type == 'AddmmBackward':
                 biases = func.next_functions[0][0].variable.data
                 weights = func.next_functions[2][0].next_functions[0][0].variable.data
@@ -90,6 +91,20 @@ def save_fc2caffe(weights, biases, fc_param):
 def save_bn2caffe(running_mean, running_var, bn_param):
     bn_param[0].data[...] = running_mean.numpy()
     bn_param[1].data[...] = running_var.numpy()
+    bn_param[2].data[...] = np.array([1.0])
+
+def save_bn2caffe_merged(running_mean, running_var, weights, biases, bn_param):
+    """ Derived a formula for merging the Batchnorm and Scale layer by modifying the 
+        running_mean and running_var to include the weights and biases.
+    """
+    running_mean = running_mean.numpy()
+    running_var = running_var.numpy()
+    weights = weights.numpy()
+    biases = biases.numpy()
+    merged_var = running_var / (weights * weights)
+    merged_mean = running_mean - np.sqrt(merged_var) * biases
+    bn_param[0].data[...] = merged_mean
+    bn_param[1].data[...] = merged_var
     bn_param[2].data[...] = np.array([1.0])
 
 def save_scale2caffe(weights, biases, scale_param):
@@ -161,14 +176,14 @@ def pytorch2prototxt(input_var, output_var):
             batch_norm_param['use_global_stats'] = 'true'
             bn_layer['batch_norm_param'] = batch_norm_param
     
-            scale_layer = OrderedDict()
-            scale_layer['name'] = parent_name + "_scale"
-            scale_layer['type'] = 'Scale'
-            scale_layer['bottom'] = parent_top
-            scale_layer['top'] = parent_top
-            scale_param = OrderedDict()
-            scale_param['bias_term'] = 'true'
-            scale_layer['scale_param'] = scale_param
+            # scale_layer = OrderedDict()
+            # scale_layer['name'] = parent_name + "_scale"
+            # scale_layer['type'] = 'Scale'
+            # scale_layer['bottom'] = parent_top
+            # scale_layer['top'] = parent_top
+            # scale_param = OrderedDict()
+            # scale_param['bias_term'] = 'true'
+            # scale_layer['scale_param'] = scale_param
         elif parent_type == 'ThresholdBackward':
             parent_top = parent_bottoms[0]
         elif parent_type == 'MaxPool2dBackward':
