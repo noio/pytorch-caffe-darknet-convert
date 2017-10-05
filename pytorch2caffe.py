@@ -18,6 +18,7 @@ layer_dict = {'ConvNdBackward'    : 'Convolution',
               'AddmmBackward'     : 'InnerProduct',
               'BatchNormBackward' : 'BatchNorm',
               'AddBackward'       : 'Eltwise',
+              'SoftmaxBackward'   : 'Softmax',
               'ViewBackward'      : 'Reshape'}
 
 layer_id = 0
@@ -80,7 +81,7 @@ def pytorch2caffe(input_var, output_var, protofile, caffemodel):
     net.save(caffemodel)
 
 def save_conv2caffe(weights, biases, conv_param):
-    if biases:
+    if biases is not None:
         conv_param[1].data[...] = biases.numpy() 
     conv_param[0].data[...] = weights.numpy() 
 
@@ -186,6 +187,11 @@ def pytorch2prototxt(input_var, output_var):
             # scale_layer['scale_param'] = scale_param
         elif parent_type == 'ThresholdBackward':
             parent_top = parent_bottoms[0]
+        elif parent_type == 'LeakyReLUBackward':
+            parent_top = parent_bottoms[0]
+            layer['relu_param'] = OrderedDict(negative_slope=0.1)
+        elif parent_type == 'SoftmaxBackward':
+            parent_top = parent_bottoms[0]
         elif parent_type == 'MaxPool2dBackward':
             pooling_param = OrderedDict()
             pooling_param['pool'] = 'MAX'
@@ -235,7 +241,9 @@ if __name__ == '__main__':
     import torchvision
     from visualize import make_dot
 
-    m = torchvision.models.resnet50(pretrained=True)
+    #m = torchvision.models.resnet50(pretrained=True)
+    m = torchvision.models.vgg16()
+    m.classifier.add_module('softmax', torch.nn.Softmax())
     m.eval() # very important here, otherwise batchnorm running_mean, running_var will be incorrect
     input_var = Variable(torch.rand(1, 3, 224, 224))
 
@@ -247,4 +255,5 @@ if __name__ == '__main__':
     fp.close()
     #exit(0)
 
-    pytorch2caffe(input_var, output_var, 'resnet50-pytorch2caffe.prototxt', 'resnet50-pytorch2caffe.caffemodel')
+    #pytorch2caffe(input_var, output_var, 'resnet50-pytorch2caffe.prototxt', 'resnet50-pytorch2caffe.caffemodel')
+    pytorch2caffe(input_var, output_var, 'vgg16-pytorch2caffe.prototxt', 'vgg16-pytorch2caffe.caffemodel')
