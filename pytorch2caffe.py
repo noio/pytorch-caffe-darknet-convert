@@ -51,7 +51,7 @@ def pytorch2caffe(input_var, output_var, protofile, caffemodel):
                                 layer_id = layer_id + 1
     
             parent_name = parent_type+str(layer_id)
-            print('converting %s' % parent_name)
+            print(f'{layer_id} converting {parent_name}')
             if parent_type == 'ConvNdBackward':
                 weights = func.next_functions[1][0].variable.data
                 if func.next_functions[2][0]:
@@ -225,7 +225,7 @@ def pytorch2prototxt(input_var, output_var):
         if parent_type != 'ViewBackward':
             if parent_type == "BatchNormBackward":
                 layers.append(bn_layer)
-                layers.append(scale_layer)
+                # layers.append(scale_layer)
             else:
                 layers.append(layer)
             #layer_id = layer_id + 1
